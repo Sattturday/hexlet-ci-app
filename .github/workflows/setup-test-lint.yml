@@ -1,26 +1,29 @@
-name: setup-test-lint
-on: push
+name: Node CI
+
+on:
+  - push
+  - pull_request
+
+env:
+  CI: true
 
 jobs:
-  build: 
+  build:
+
     runs-on: ubuntu-latest
 
-    steps:
-      # Клонируем репозиторий
-      - uses: actions/checkout@v4
-      
-      # Устанавливаем Node.js
-      - uses: actions/setup-node@v4
-      
-      # Ставим зависимости
-      - run: make setup
-      
-      # Запускаем линтер
-      - run: make lint
-      
-      # Запускаем тесты
-      - name: run tests
-        run: make test
+    strategy:
+      matrix:
+        node-version: [18.x]
 
-      - name: Print Hello from Hexlet
-        uses: hexlet-components/hello-from-hexlet-action@release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: make install
+      - run: make lint
+      - run: make test
+      - uses: hexlet-components/hello-from-hexlet-action@release
